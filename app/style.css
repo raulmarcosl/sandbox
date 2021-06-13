@@ -1,0 +1,31 @@
+body {
+	overflow: hidden;
+	margin: 0;
+	height: 100%;
+}
+
+#password {
+	position: fixed;
+	top: 30%;
+	transform: translateY(-30%);
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+input.letter {
+	width: 40px;
+	background-color: transparent;
+	color: #eeeeee;
+	outline: none;
+	outline-style: none;
+	outline-offset: 0;
+	border-top: none;
+	border-left: none;
+	border-right: none;
+	border-bottom: solid #eeeeee 3px;
+	padding: 10px 10px;
+	margin: 0px 10px;
+
+	font-size: 3em;
+	text-align: center;
+}
