@@ -87,7 +87,8 @@ $(document).ready(function () {
       var box = createBoundingBox(n, width / 3, height / 3, center);
       var polygon = createConvexPolygon(box);
 
-      var colors = shuffle(["#394053","#4e4a59","#6e6362","#839073","#7cae7a","#97ead2","#8cc7a1"]);
+      // var colors = shuffle(["#394053","#4e4a59","#6e6362","#839073","#7cae7a","#97ead2","#8cc7a1"]);
+      var colors = ["#FF008C", "#A3005A", "#7A0043", "#000DFF", "#0008A3", "#00067A", "#000566"];
 
       drawPolygon(ctx, polygon, colors[0], lines, ratio);
 
@@ -153,7 +154,7 @@ $(document).ready(function () {
     }
 
     $( "#slider-lines" ).slider({
-      min: 1,
+      min: 50,
       max: 1000,
       step: 10,
       slide: reDraw,
@@ -162,8 +163,8 @@ $(document).ready(function () {
 
     $( "#slider-ratio" ).slider({
       min: 0.005,
-      max: 0.1,
-      step: 0.005,
+      max: 0.06,
+      step: 0.001,
       slide: reDraw,
       change: reDraw
     });

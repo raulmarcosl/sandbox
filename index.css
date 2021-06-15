@@ -2,6 +2,7 @@ body {
 	overflow: hidden;
 	margin: 0;
 	height: 100%;
+	font-family: "DelaGothic", sans-serif;
 }
 
 #password {
@@ -15,17 +16,21 @@ body {
 input.letter {
 	width: 40px;
 	background-color: transparent;
-	color: #eeeeee;
+	color: #fff;
+	/* text-shadow: #bbbfbc 1px 0 10px; */
+	text-shadow: 1px 1px 2px #d9dbda;
+	box-shadow: 0 5px 4px -4px #d9dbda;
 	outline: none;
 	outline-style: none;
 	outline-offset: 0;
 	border-top: none;
 	border-left: none;
 	border-right: none;
-	border-bottom: solid #eeeeee 3px;
+	border-bottom: solid #fff 5px;
 	padding: 10px 10px;
 	margin: 0px 10px;
 
+	font-family: "DelaGothic", sans-serif;
 	font-size: 3em;
 	text-align: center;
 }
