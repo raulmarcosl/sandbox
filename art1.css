@@ -1,10 +1,32 @@
-* {
-    margin: 0;
-    padding: 0;
-    outline: 0;
-  }
-  html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
+/* canvas {
+    margin-left: ;
+} */
+
+#container {
+    margin-left: 40px;
+}
+
+#sliders {
+	margin: 15px;
+}
+
+.ui-slider {
+    margin-top: 10px;
+    height: 7px;
+    position: relative;
+	width: 700px;
+    border: none;
+    background: #ff5b63; 
+}
+
+.ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
+    /* background: #ff5b63; */
+    border-radius: 25px;
+    outline: none;
+    border: 2px solid #fff;
+    position: absolute;
+    top: -10px;
+}
+.ui-slider-horizontal .ui-slider-range {
+    background: #e9ecf1
+}

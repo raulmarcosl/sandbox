@@ -1,85 +1,172 @@
-var camera, scene, renderer,
-    geometry, material, mesh;
- 
-init();
-animate(); 
+$(document).ready(function () {
+    class Point {
+        constructor (x, y) { this.x = x; this.y = y }
+      }
+      
+    function createBoundingBox (n, width, height, center) {
+      var radians = [];
+      for (var i = 0; i < n; i++) {
+        radians[i] = (i / n) * (2 * Math.PI);
+      }
 
-function init() {
-    // stats = new Stats();
-    // stats.setMode(0);
-    // stats.domElement.style.position = 'absolute';
-    // stats.domElement.style.left = '0px';
-    // stats.domElement.style.top = '0px';
-    // document.body.appendChild(stats.domElement);
-
-    clock = new THREE.Clock();
-
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize( window.innerWidth, window.innerHeight );
-
-    scene = new THREE.Scene();
- 
-    camera = new THREE.PerspectiveCamera( 90, window.innerWidth / window.innerHeight, 1, 10000 );
-    camera.position.z = 1000;
-    scene.add( camera );
- 
-    geometry = new THREE.CubeGeometry( 200, 200, 200 );
-    material = new THREE.MeshLambertMaterial( { color: 0xaa6666, wireframe: false } );
-    mesh = new THREE.Mesh( geometry, material );
-    cubeSineDriver = 0;
- 
-    textGeo = new THREE.PlaneGeometry(300,300);
-    THREE.ImageUtils.crossOrigin = ''; //Need this to pull in crossdomain images from AWS
-    textTexture = THREE.ImageUtils.loadTexture('https://s3-us-west-2.amazonaws.com/s.cdpn.io/95637/quickText.png');
-    textMaterial = new THREE.MeshLambertMaterial({color: 0x00ffff, opacity: 1, map: textTexture, transparent: true, blending: THREE.AdditiveBlending})
-    text = new THREE.Mesh(textGeo,textMaterial);
-    text.position.z = 800;
-    scene.add(text);
-
-    light = new THREE.DirectionalLight(0xffffff,0.5);
-    light.position.set(-1,0,1);
-    scene.add(light);
-  
-    smokeTexture = THREE.ImageUtils.loadTexture('https://s3-us-west-2.amazonaws.com/s.cdpn.io/95637/Smoke-Element.png');
-    smokeMaterial = new THREE.MeshLambertMaterial({color: 0x00dddd, map: smokeTexture, transparent: true});
-    smokeGeo = new THREE.PlaneGeometry(300,300);
-    smokeParticles = [];
-
-
-    for (p = 0; p < 150; p++) {
-        var particle = new THREE.Mesh(smokeGeo,smokeMaterial);
-        particle.position.set(Math.random()*500-250,Math.random()*500-250,Math.random()*1000-100);
-        particle.rotation.z = Math.random() * 360;
-        scene.add(particle);
-        smokeParticles.push(particle);
+      var box = [];
+      box[0] = new Point(center.x + width * Math.cos(radians[0]), center.y);
+      for (i = 1; i < n; i++) {
+        box[i] = new Point(
+          center.x + width * Math.cos(radians[i]),
+          center.y + height * Math.sin(radians[i])
+        );
+      }
+      return box;
     }
- 
-    document.body.appendChild( renderer.domElement );
- 
-}
- 
-function animate() {
- 
-    // note: three.js includes requestAnimationFrame shim
-    // stats.begin();
-    delta = clock.getDelta();
-    requestAnimationFrame( animate );
-    evolveSmoke();
-    render();
-    // stats.end();
-}
- 
-function evolveSmoke() {
-    var sp = smokeParticles.length;
-    while(sp--) {
-        smokeParticles[sp].rotation.z += (delta * 0.2);
-    }
-}
 
-function render() {
-    mesh.rotation.x += 0.005;
-    mesh.rotation.y += 0.0;
-    cubeSineDriver += .01;
-    mesh.position.z = 100 + (Math.sin(cubeSineDriver) * 500);
-    renderer.render( scene, camera ); 
-}
+    function createConvexPolygon (box) {
+      var polygon = [];
+      for (var i = 0; i < box.length; i++) {
+        var xOffset = Math.random() * (box[(i + 1) % box.length].x - box[i].x);
+        var yOffset = Math.random() * (box[(i + 1) % box.length].y - box[i].y);
+        if (Math.random() > 0.5) {
+          polygon[i] = new Point(box[i].x - xOffset, box[i].y - yOffset);
+        } else {
+          polygon[i] = new Point(box[i].x + xOffset, box[i].y + yOffset);
+        }
+      }
+      return polygon;
+    }
+
+    function drawPolygon (ctx, polygon, color, lines, ratio) {
+      ctx.beginPath();
+
+      ctx.moveTo(polygon[0].x, polygon[0].y)
+      for (var i = 1; i <= polygon.length; i++) {
+        ctx.lineTo(polygon[i % polygon.length].x, polygon[i % polygon.length].y);
+      }
+
+      ctx.moveTo(polygon[polygon.length - 1].x, polygon[polygon.length - 1].y)
+      for (i = 0; i < lines; i++) {
+        var r = ratio;
+        var x = polygon[i].x + r * (polygon[i + 1].x - polygon[i].x);
+        var y = polygon[i].y + r * (polygon[i + 1].y - polygon[i].y);
+        ctx.strokeStyle = color;
+        ctx.lineTo(x, y);
+
+        
+        polygon[polygon.length] = new Point(x, y)
+        
+      }
+      // Go to the end of the polygon
+      ctx.stroke();
+      ctx.moveTo(polygon[0].x, polygon[0].y)
+    }
+
+    function shuffle(array) {
+      var currentIndex = array.length;
+      var randomIndex;
+
+      while (0 !== currentIndex) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+
+        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+      }
+
+      return array;
+    }
+
+    function draw(lines, ratio) {
+      var canvas = document.getElementById('doodle');
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      var center = new Point(canvas.width / 2, canvas.height / 2);
+      var height = canvas.height;
+      var width = canvas.width;
+
+      var n = 6;
+
+      var box = createBoundingBox(n, width / 3, height / 3, center);
+      var polygon = createConvexPolygon(box);
+
+      var colors = shuffle(["#394053","#4e4a59","#6e6362","#839073","#7cae7a","#97ead2","#8cc7a1"]);
+
+      drawPolygon(ctx, polygon, colors[0], lines, ratio);
+
+      var a = [
+        new Point(polygon[0].x, polygon[0].y),
+        new Point(width, polygon[0].y),
+        new Point(width, height),
+        new Point(polygon[1].x, height),
+        new Point(polygon[1].x, polygon[1].y)
+      ];
+      drawPolygon(ctx, a, colors[1], lines, ratio);
+
+      var b = [
+        new Point(polygon[1].x, polygon[1].y),
+        new Point(polygon[1].x, height),
+        new Point(0, height),
+        new Point(0, polygon[2].y),
+        new Point(polygon[2].x, polygon[2].y)
+      ];
+      drawPolygon(ctx, b, colors[2], lines, ratio);
+
+      var c = [
+        new Point(polygon[2].x, polygon[2].y),
+        new Point(0, polygon[2].y),
+        new Point(0, polygon[3].y),
+        new Point(polygon[3].x, polygon[3].y)
+      ];
+      drawPolygon(ctx, c, colors[3], lines, ratio);
+
+      var e = [
+        new Point(polygon[3].x, polygon[3].y),
+        new Point(0, polygon[3].y),
+        new Point(0, 0),
+        new Point(polygon[4].x, 0),
+        new Point(polygon[4].x, polygon[4].y)
+      ];
+      drawPolygon(ctx, e, colors[4], lines, ratio);
+
+      var f = [
+          new Point(polygon[4].x, polygon[4].y),
+          new Point(polygon[4].x, 0),
+          new Point(width, 0),
+          new Point(width, polygon[5].y),
+          new Point(polygon[5].x, polygon[5].y)
+      ];
+      drawPolygon(ctx, f, colors[5], lines, ratio);
+
+      var g = [
+          new Point(polygon[5].x, polygon[5].y),
+          new Point(width, polygon[5].y),
+          new Point(width, polygon[0].y),
+          new Point(polygon[0].x, polygon[0].y)
+      ];
+      drawPolygon(ctx, g, colors[6], lines, ratio);
+    }
+    
+    function reDraw() {
+      var lines = $("#slider-lines").slider("value");
+      var ratio = $("#slider-ratio").slider("value");
+      console.log('lines: ', lines);
+      console.log('ratio: ', ratio);
+      draw(lines, ratio);
+    }
+
+    $( "#slider-lines" ).slider({
+      min: 1,
+      max: 1000,
+      step: 10,
+      slide: reDraw,
+      change: reDraw 
+    });
+
+    $( "#slider-ratio" ).slider({
+      min: 0.005,
+      max: 0.1,
+      step: 0.005,
+      slide: reDraw,
+      change: reDraw
+    });
+
+    reDraw();
+  });
